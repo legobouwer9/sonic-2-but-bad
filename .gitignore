@@ -1,0 +1,18 @@
+SonLVL INI Files/dllcache
+SonLVL INI Files/SonLVL.log
+*~
+s2.h
+s2.p
+s2.lst
+s2.log
+s2.map
+s2built.bin
+s2built.prev.bin
+bin/
+build_source/**/obj/
+build_source/**/bin/
+*.csproj.user
+*.suo
+*_cmp.bin
+*.gen.asm
+.vs/
