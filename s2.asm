@@ -32721,8 +32721,8 @@ loc_19B28:
 	btst	#1,status(a1)
 	bne.s	loc_19B1C
 	mvabs.w	d0,d4
-	cmpi.w	#$10,d4
-	blo.w	loc_19A6A
+	;cmpi.w	#$10,d4
+	;blo.w	loc_19A6A
 	move.l	a0,-(sp)
 	movea.l	a1,a0
 	jsr	(KillCharacter).l
