@@ -11478,6 +11478,7 @@ OptionScreen_Select:
 	moveq	#0,d0
 	move.w	d0,(Two_player_mode).w
 	move.w	d0,(Two_player_mode_copy).w
+	move.w	#metropolis_zone_act_1,d0
 	move.w	d0,(Current_ZoneAndAct).w	; emerald_hill_zone_act_1
 	move.b	#GameModeID_Level,(Game_Mode).w ; => Level (Zone play mode)
 	rts
@@ -72463,7 +72464,7 @@ loc_38244:
 
 loc_3824E:
 	addq.b	#2,routine_secondary(a0)
-	jsr	(SingleObjLoad).l
+	jsr	(SingleObjLoad2).l
 	bne.s	+	; rts
 	_move.b	#ObjID_Explosion,id(a1) ; load 0bj27
 	move.b	#2,routine(a1)
