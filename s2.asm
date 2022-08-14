@@ -62067,6 +62067,8 @@ BranchTo_JmpTo36_DisplaySprite ; BranchTo
 
 loc_301AA:
 	move.w	#$3160,(Camera_Max_X_pos).w
+	move.w	#DACSFXID_EggmanFuckingDies,d0
+	jsr	(PlaySound).w
 
     if removeJmpTos
 JmpTo53_DeleteObject ; JmpTo
@@ -65683,7 +65685,7 @@ Obj55_LaserShooter_Rise:
 	move.w	#0,(Boss_Y_vel).w
 	addi_.b	#2,boss_routine(a0)	; => Obj55_LaserShooter_ChooseTarget
 	move.w	#$80,(Boss_Countdown).w
-	move.b	#3,Obj55_shot_count(a0)	; prepare to shoot 3 lasers
+	move.b	#6,Obj55_shot_count(a0)	; prepare to shoot 3 lasers
 	bra.w	Obj55_LaserShooter_End
 ; ===========================================================================
 ; loc_332C6:
@@ -73097,8 +73099,8 @@ loc_38A2C:
 ; ===========================================================================
 
 loc_38A44:
-	_move.b	#ObjID_Explosion,id(a0) ; load 0bj27
-	move.b	#2,routine(a0)
+	;_move.b	#ObjID_Explosion,id(a0) ; load 0bj27
+	;move.b	#2,routine(a0)
 	bsr.w	loc_38A58
 	jmpto	(MarkObjGone).l, JmpTo39_MarkObjGone
 ; ===========================================================================
