@@ -65685,7 +65685,7 @@ Obj55_LaserShooter_Rise:
 	move.w	#0,(Boss_Y_vel).w
 	addi_.b	#2,boss_routine(a0)	; => Obj55_LaserShooter_ChooseTarget
 	move.w	#$80,(Boss_Countdown).w
-	move.b	#6,Obj55_shot_count(a0)	; prepare to shoot 3 lasers
+	move.b	#3,Obj55_shot_count(a0)	; prepare to shoot 3 lasers
 	bra.w	Obj55_LaserShooter_End
 ; ===========================================================================
 ; loc_332C6:
