@@ -4155,7 +4155,7 @@ MusicList: zoneOrderedTable 1,2
 	zoneTableEntry.b MusID_WFZ, MusID_EHZ	; 6 ; WFZ
 	zoneTableEntry.b MusID_HTZ, MusID_HTZ	; 7 ; HTZ
 	zoneTableEntry.b MusID_HPZ, MusID_HPZ	; 8
-	zoneTableEntry.b MusID_SCZ, MusID_EHZ	; 9
+	zoneTableEntry.b MusID_GCZ, MusID_GCZ	; 9
 	zoneTableEntry.b MusID_CNZ_2P, MusID_OOZ	; 10 ; OOZ
 	zoneTableEntry.b MusID_MCZ, MusID_MCZ	; 11 ; MCZ
 	zoneTableEntry.b MusID_CNZ, MusID_CNZ	; 12 ; CNZ
@@ -5261,7 +5261,7 @@ LoadCollisionIndexes:
 ; level. 1 pointer for each level, pointing the primary collision index.
 ; ---------------------------------------------------------------------------
 Off_ColP: zoneOrderedTable 4,1
-	zoneTableEntry.l ColP_EHZHTZ
+	zoneTableEntry.l ColP_EHZHTZ2
 	zoneTableEntry.l ColP_Invalid	; 1
 	zoneTableEntry.l ColP_MTZ	; 2
 	zoneTableEntry.l ColP_Invalid	; 3
@@ -5288,7 +5288,7 @@ Off_ColP: zoneOrderedTable 4,1
 ; index.
 ; ---------------------------------------------------------------------------
 Off_ColS: zoneOrderedTable 4,1
-	zoneTableEntry.l ColS_EHZHTZ
+	zoneTableEntry.l ColS_EHZHTZ2
 	zoneTableEntry.l ColP_Invalid	; 1
 	zoneTableEntry.l ColP_MTZ	; 2
 	zoneTableEntry.l ColP_Invalid	; 3
@@ -11914,7 +11914,7 @@ LevelSelect_Return:
 ;Misc_9454:
 LevelSelect_Order:
 	dc.w	emerald_hill_zone_act_1
-	dc.w	emerald_hill_zone_act_2	; 1
+	dc.w	$900	; 1 emerald_hill_zone_act_2
 	dc.w	chemical_plant_zone_act_1	; 2
 	dc.w	chemical_plant_zone_act_2	; 3
 	dc.w	aquatic_ruin_zone_act_1	; 4
@@ -14736,10 +14736,75 @@ SwScrl_EHZ:
 	add.l	d0,d3
 	swap	d3
 	dbf	d1,-
-
+	move.w	d4,(a1)+
+	move.w	d3,(a1)+
+	move.w	d4,(a1)+
+	move.w	d3,(a1)+
 	; note there is a bug here. the bottom 8 pixels haven't had their hscroll values set. only the EHZ scrolling code has this bug.
 
+	;rts
+	
+SwScrl_Water:
+	lea	(Obj0A_WobbleData).l,a3
+	lea	(Obj0A_WobbleData).l,a2
+
+	move.b	($FFFFF7D8).w,d2
+	move.b	d2,d3
+	addi.w	#$80,($FFFFF7D8).w
+
+	add.w	(Camera_BG_Y_pos).w,d2
+	andi.w	#$FF,d2
+
+	add.w	(Camera_Y_pos).w,d3
+	andi.w	#$FF,d3
+
+	lea	(Horiz_Scroll_Buf).w,a1
+	move.w	#$DF,d1
+	move.w	(Water_Level_1).w,d4
+	move.w	(Camera_Y_pos).w,d5
+	
+-	; as long as the camera is above the water
+	cmp.w	d4,d5			; is camera below water?
+	bge.s	SwScrl_Water_doRipple	; if yes, branch
+	addq.w	#4,a1		; increment pointer
+	addq.w	#1,d5		; increment camera y pos
+	addq.b	#1,d2
+	addq.b	#1,d3
+	dbf	d1,-
 	rts
+
+	; does the LZ water ripple effect once the camera is below the water
+SwScrl_Water_doRipple:
+	move.b	(a3,d3.w),d4	; FG ripple effect
+	ext.w	d4
+	add.w	d4,(a1)+
+
+	move.b	(a2,d2.w),d4	; BG ripple effect
+	ext.w	d4
+	add.w	d4,(a1)+
+
+	addq.b	#1,d2
+	addq.b	#1,d3
+	dbf	d1,SwScrl_Water_doRipple
+	rts
+
+Deform_LZ_Data2:
+	dc.b   1,  1,  2,  2,  3,  3,  3,  3,  2,  2,  1,  1,  0,  0,  0,  0; 0
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 16
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 32
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 48
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 64
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 80
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 96
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 112
+	dc.b  -1, -1, -2, -2, -3, -3, -3, -3, -2, -2, -1, -1,  0,  0,  0,  0; 128
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 144
+	dc.b   1,  1,  2,  2,  3,  3,  3,  3,  2,  2,  1,  1,  0,  0,  0,  0; 160
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 176
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 192
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 208
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 224
+	dc.b   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0; 240
 ; ===========================================================================
 ; horizontal offsets for the water rippling effect
 ; byte_C682:
@@ -18597,6 +18662,12 @@ LevEvents_EHZ2_Routine3:
 	addq.b	#2,(Dynamic_Resize_Routine).w ; => LevEvents_EHZ2_Routine4
 	move.w	#MusID_Boss,d0
 	jsrto	(PlayMusic).l, JmpTo3_PlayMusic
+	move.b	#$01,(Current_Zone).w
+	jsr		LoadZoneTiles
+	jsr	(loadZoneBlockMaps).l
+	move.b	#1,(Screen_redraw_flag).w
+	jsr	(DrawInitialBG).l
+	move.b	#$00,(Current_Zone).w
 +
 	rts
 ; ===========================================================================
@@ -23937,7 +24008,7 @@ super_shoes_Tails:
 shield_monitor:
 	addq.w	#1,(a2)
 	bset	#status_sec_hasShield,status_secondary(a1)	; give shield status
-	move.w	#SndID_Shield,d0
+	move.w	#DACSFXID_EAT,d0
 	jsr	(PlayMusic).l
 	tst.b	parent+1(a0)
 	bne.s	+
@@ -26324,7 +26395,7 @@ Obj34_MapUnc_147BA:	offsetTable
 	offsetTableEntry.w word_14B24
 	offsetTableEntry.w word_14894
 	offsetTableEntry.w word_148CE
-	offsetTableEntry.w word_147E8
+	offsetTableEntry.w TC_GCZ
 	offsetTableEntry.w word_14930
 	offsetTableEntry.w word_14972
 	offsetTableEntry.w word_149C4
@@ -26338,6 +26409,20 @@ Obj34_MapUnc_147BA:	offsetTable
 	offsetTableEntry.w word_14BFE
 	offsetTableEntry.w word_14C08
 	offsetTableEntry.w word_14C32
+TC_GCZ:		dc.w $C				; GENOCIDE CITY
+		dc.w $0005, $85DE, $82EF, $FFC0	; G
+		dc.w $0005, $8580, $82C0, $FFD0	; E
+		dc.w $0005, $8584, $82C2, $FFE0	; N
+		dc.w $0005, $8588, $82C4, $FFF0	; O
+		dc.w $0005, $85E2, $82F1, $0000	; C
+		dc.w $0001, $85E6, $82F3, $0010	; I
+		dc.w $0005, $85E8, $82F4, $0018	; D
+		dc.w $0005, $8580, $82C0, $0028	; E
+
+		dc.w $0005, $85E2, $82F1, $0048	; C
+		dc.w $0001, $85E6, $82F3, $0058	; I
+		dc.w $0005, $85EC, $82F6, $0060	; T
+		dc.w $0005, $85F0, $82F8, $0070	; Y
 word_147E8:	dc.w $C				; GREEN HILL TWO
 		dc.w $0005, $85DE, $82EF, $FFA0	; G
 		dc.w $0005, $85E2, $82F1, $FFB0	; R
@@ -26898,7 +26983,7 @@ Off_TitleCardLetters:
 	dc.b TitleCardLetters_WFZ - TitleCardLetters	; 6
 	dc.b TitleCardLetters_HTZ - TitleCardLetters	; 7
 	dc.b TitleCardLetters_HPZ - TitleCardLetters	; 8
-	dc.b TitleCardLetters_EHZ - TitleCardLetters	; 9
+	dc.b TitleCardLetters_GCZ - TitleCardLetters	; 9
 	dc.b TitleCardLetters_OOZ - TitleCardLetters	; A
 	dc.b TitleCardLetters_MCZ - TitleCardLetters	; B
 	dc.b TitleCardLetters_CNZ - TitleCardLetters	; C
@@ -26925,6 +27010,8 @@ TitleCardLetters:
 
 TitleCardLetters_EHZ:
 	titleLetters	"GREEN HILL TWO"
+TitleCardLetters_GCZ:
+	titleLetters	"GENOCIDE CITY"
 TitleCardLetters_MTZ:
 	titleLetters	"BOBS LAIR"
 TitleCardLetters_HTZ:
@@ -33313,7 +33400,7 @@ Obj01_Control:
 	bne.s	+				; if not, branch
 	andi.w	#$7FF,y_pos(a0) 		; perform wrapping of Sonic's y position
 +
-	bsr.s	Sonic_Display
+	bsr.w	Sonic_Display
 	bsr.w	Sonic_Super
 	bsr.w	Sonic_RecordPos
 	bsr.w	Sonic_Water
@@ -33341,7 +33428,23 @@ Obj01_Modes:	offsetTable
 		offsetTableEntry.w Obj01_MdRoll			; 4 - rolling
 		offsetTableEntry.w Obj01_MdJump			; 6 - jumping
 ; ===========================================================================
-
+; me when i decide to add wacky workbench bounce to everything
+Sonic_CheckFloorBounce:
+	move.w	#-$1600,y_vel(a0)
+	bset	#1,status(a0)
+	bclr	#4,status(a0)
+	bclr	#5,status(a0)
+	clr.b	jumping(a0)
+	bset	#2,status(a0)
+	bne.s	+
+	move.b	#$E,y_radius(a0)
+	move.b	#7,x_radius(a0)
+	addq.w	#5,y_pos(a0)
+	move.b	#2,anim(a0)
+	move.w	#SndID_Spring,d0
+	jsr	PlaySound
++
+	rts
 ; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
 
 ; loc_1A0C6:
@@ -33535,6 +33638,7 @@ Obj01_MdNormal:
 	bsr.w	Sonic_Move
 	bsr.w	Sonic_Roll
 	bsr.w	Sonic_LevelBound
+	;bsr.w	Sonic_CheckFloorBounce ; please dont uncomment
 	jsr	(ObjectMove).l
 	bsr.w	AnglePos
 	bsr.w	Sonic_SlopeRepel
@@ -58473,17 +58577,17 @@ return_2D232:
 ; ===========================================================================
 ; loc_2D234:
 Obj4B_Shooting:
-	move.w	Obj4B_shot_timer(a0),d0	; get timer value
-	subq.w	#1,d0			; decrement
-	blt.s	Obj4B_DoneShooting	; branch, if timer has expired
-	move.w	d0,Obj4B_shot_timer(a0)	; update timer value
-	cmpi.w	#$14,d0			; has timer reached a certain value?
+	;move.w	Obj4B_shot_timer(a0),d0	; get timer value
+	;subq.w	#1,d0			; decrement
+	;blt.s	Obj4B_DoneShooting	; branch, if timer has expired
+	;move.w	d0,Obj4B_shot_timer(a0)	; update timer value
+	;cmpi.w	#$14,d0			; has timer reached a certain value?
 	beq.s	Obj4B_ShootProjectile	; if yes, branch
 	rts
 ; ---------------------------------------------------------------------------
 ; loc_2D248:
 Obj4B_DoneShooting:
-	subq.b	#2,routine_secondary(a0)	; => Obj4B_Roaming
+	;subq.b	#2,routine_secondary(a0)	; => Obj4B_Roaming
 	rts
 ; ---------------------------------------------------------------------------
 ; loc_2D24E
@@ -58614,7 +58718,7 @@ Obj5C_Main:
 	cmp.w	y_pos(a0),d0	; has object reached its initial y position?
 	bhs.s	+		; if not, branch
 	move.w	d0,y_pos(a0)
-	move.w	#-$500,y_vel(a0)	; jump
+	move.w	#-$2000,y_vel(a0)	; jump
 +
 	move.b	#1,anim(a0)
 	subi.w	#$C0,d0
@@ -59223,6 +59327,7 @@ Obj5D_Main_Pos_and_Collision:
 	; do hovering motion using sine wave
 	move.b	Obj5D_hover_counter(a0),d0
 	jsr	(CalcSine).l
+	jsr	(CalcSine).l
 	asr.w	#6,d0
 	add.w	Obj5D_y_pos_next(a0),d0		; get y position for next frame, add sine value
 	move.w	d0,y_pos(a0)			; set y and x positions
@@ -59345,12 +59450,12 @@ Obj5D_Main_2:
 	bgt.s	Obj5D_Main_2_MoveRight
 
 ;Obj5D_Main_2_MoveLeft:
-	move.w	#-$300,x_vel(a0)
+	move.w	#-$600,x_vel(a0)
 	bra.s	Obj5D_Main_2_End
 ; ---------------------------------------------------------------------------
 
 Obj5D_Main_2_MoveRight:
-	move.w	#$300,x_vel(a0)
+	move.w	#$600,x_vel(a0)
 
 Obj5D_Main_2_End:
 	bsr.w	Obj5D_Main_Move
@@ -60236,6 +60341,7 @@ Obj5D_Gunk_Main:
 	jmp	(DisplaySprite).l
 ; ===========================================================================
 +
+	jsr	loc_38A58
 	add.w	d1,y_pos(a0)
 	movea.l	Obj5D_parent(a0),a1 ; a1=object
 	movea.l	Obj5D_parent(a1),a1
@@ -61300,6 +61406,12 @@ loc_2F768:
 	tst.w	d1
 	bpl.s	loc_2F77E
 	add.w	d1,y_pos(a0)	; reset on floor
+	
+	jsr	(RandomNumber).l
+	andi.w	#$5F,d0
+	bne.s	+
+	jsr	loc_38A58
++
 
 loc_2F77E:
 	move.w	#$100,y_vel(a0)
@@ -62367,7 +62479,7 @@ Obj89_Main_Sub0:
 	move.w	#$430,(Boss_Y_pos).w
 	addi_.b	#2,boss_routine(a0)	; => Obj89_Main_Sub2
 	move.w	#0,(Boss_Y_vel).w		; stop y movement
-	move.w	#-$C8,(Boss_X_vel).w		; move leftward
+	move.w	#-$C8*2,(Boss_X_vel).w		; move leftward
 	st	obj89_target(a0)
 
 ; loc_3066C:
@@ -62439,12 +62551,12 @@ Obj89_Main_Sub6:
 	move.b	#2,boss_routine(a0)	; => Obj89_Main_Sub2
 	bchg	#0,render_flags(a0)		; face opposite direction
 	beq.s	Obj89_Main_Sub6_MoveRight	; branch, if new direction is right
-	move.w	#-$C8,(Boss_X_vel).w		; move left
+	move.w	#-$C8*2,(Boss_X_vel).w		; move left
 	bra.s	Obj89_Main_Sub6_Standard
 ; ===========================================================================
 ; loc_3073C:
 Obj89_Main_Sub6_MoveRight:
-	move.w	#$C8,(Boss_X_vel).w		; move right
+	move.w	#$C8*2,(Boss_X_vel).w		; move right
 
 ; loc_30742:
 Obj89_Main_Sub6_Standard:
@@ -62940,6 +63052,7 @@ Obj89_Arrow_Sub2_Stop:
 	move.w	d0,x_pos(a0)			; update position
 	move.b	#SndID_ArrowStick,d0
 	jsrto	(PlaySound).l, JmpTo8_PlaySound
+	jsr	loc_38A58
 	jmpto	(DisplaySprite).l, JmpTo37_DisplaySprite
 ; ===========================================================================
 ; loc_30C7E:
@@ -63434,8 +63547,8 @@ Obj57_LoadStoneSpike:
 	ori.b	#4,render_flags(a1)
 	move.b	#3,priority(a1)
 	move.b	#$D,mapping_frame(a1)
-	tst.b	d2
-	bne.s	return_31438	; stone
+	;tst.b	d2
+	;bne.s	return_31438	; stone
 	move.b	#$14,mapping_frame(a1)	; spike
 	move.b	#$B1,collision_flags(a1)
 
@@ -64289,6 +64402,7 @@ loc_31FF8:
 ; ===========================================================================
 
 loc_32030:
+	jsr	loc_38A58
 	move.b	#SndID_BossExplosion,d0
 	jsrto	(PlaySound).l, JmpTo9_PlaySound
 	move.w	#make_art_tile(ArtTile_ArtNem_CNZBoss_Fudge,0,0),art_tile(a0)
@@ -66087,6 +66201,7 @@ Obj55_Wave:
 	neg.w	d0		; flip offset
 +
 	add.w	d0,x_pos(a1)	; set position
+	jsr	loc_38A58
 	move.b	#SndID_LaserFloor,d0
 	jsrto	(PlaySound).l, JmpTo11_PlaySound
 
@@ -74386,7 +74501,7 @@ off_398F2:	offsetTable
 		offsetTableEntry.w loc_39A1C	; $12
 		offsetTableEntry.w loc_39AAA	; $14
 		offsetTableEntry.w loc_39ACE	; $16
-		offsetTableEntry.w loc_39AF4	; $18
+		offsetTableEntry.w loc_39B44	; $18
 		offsetTableEntry.w loc_39B28	; $1A
 		offsetTableEntry.w loc_39A96	; $1C
 		offsetTableEntry.w loc_39A0A	; $1E
@@ -74850,6 +74965,21 @@ loc_39D7C:
 ; ===========================================================================
 
 loc_39D82:
+	move.b	#$4A,d2
+	moveq	#7,d6
+	lea	(byte_39D92).l,a2
+	bsr.w	Obj_CreateProjectiles
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
 	move.b	#$4A,d2
 	moveq	#7,d6
 	lea	(byte_39D92).l,a2
@@ -85811,7 +85941,7 @@ cur_zone_str := "\{cur_zone_id}"
 ; dword_42594: MainLoadBlocks: saArtPtrs:
 LevelArtPointers:
 	levartptrs PLCID_Ehz1,     PLCID_Ehz2,      PalID_EHZ,  ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   0 ; EHZ  ; EMERALD HILL ZONE
-	levartptrs PLCID_Miles1up, PLCID_MilesLife, PalID_EHZ2, ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   1 ; LEV1 ; LEVEL 1 (UNUSED)
+	levartptrs PLCID_Unused1, PLCID_Unused2, PalID_EHZ2, ArtKos_EHZ2, BM16_EHZ2, BM128_EHZ2 ;   1 ; LEV1 ; LEVEL 1 (UNUSED)
 	levartptrs PLCID_Tails1up, PLCID_TailsLife, PalID_WZ,   ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   2 ; LEV2 ; LEVEL 2 (UNUSED)
 	levartptrs PLCID_Unused1,  PLCID_Unused2,   PalID_EHZ3, ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   3 ; LEV3 ; LEVEL 3 (UNUSED)
 	levartptrs PLCID_Mtz1,     PLCID_Mtz2,      PalID_MTZ,  ArtKos_MTZ, BM16_MTZ, BM128_MTZ ;   4 ; MTZ  ; METROPOLIS ZONE ACTS 1 & 2
@@ -85819,7 +85949,7 @@ LevelArtPointers:
 	levartptrs PLCID_Wfz1,     PLCID_Wfz2,      PalID_WFZ,  ArtKos_SCZ, BM16_WFZ, BM128_WFZ ;   6 ; WFZ  ; WING FORTRESS ZONE
 	levartptrs PLCID_Htz1,     PLCID_Htz2,      PalID_HTZ,  ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   7 ; HTZ  ; HILL TOP ZONE
 	levartptrs PLCID_Hpz1,     PLCID_Hpz2,      PalID_HPZ,  ArtKos_HPZ, BM16_HPZ, BM128_HPZ ;   8 ; HPZ  ; HIDDEN PALACE ZONE (UNUSED)
-	levartptrs PLCID_Unused3,  PLCID_Unused4,   PalID_EHZ4, ArtKos_EHZ, BM16_EHZ, BM128_EHZ ;   9 ; LEV9 ; LEVEL 9 (UNUSED)
+	levartptrs PLCID_Mtz1,     PLCID_Mtz2,      PalID_MTZ,  ArtKos_GCZ, BM16_GCZ, BM128_GCZ ;   9 ; LEV9 ; LEVEL 9 (UNUSED)
 	levartptrs PLCID_Ooz1,     PLCID_Ooz2,      PalID_OOZ,  ArtKos_OOZ, BM16_OOZ, BM128_OOZ ;  $A ; OOZ  ; OIL OCEAN ZONE
 	levartptrs PLCID_Mcz1,     PLCID_Mcz2,      PalID_MCZ,  ArtKos_MCZ, BM16_MCZ, BM128_MCZ ;  $B ; MCZ  ; MYSTIC CAVE ZONE
 	levartptrs PLCID_Cnz1,     PLCID_Cnz2,      PalID_CNZ,  ArtKos_CNZ, BM16_CNZ, BM128_CNZ ;  $C ; CNZ  ; CASINO NIGHT ZONE
@@ -85879,8 +86009,8 @@ PLCptr_Miles1up:	offsetTableEntry.w PlrList_Miles1up		; 6
 PLCptr_MilesLife:	offsetTableEntry.w PlrList_MilesLifeCounter	; 7
 PLCptr_Tails1up:	offsetTableEntry.w PlrList_Tails1up		; 8
 PLCptr_TailsLife:	offsetTableEntry.w PlrList_TailsLifeCounter	; 9
-PLCptr_Unused1:		offsetTableEntry.w PlrList_Mtz1			; 10
-PLCptr_Unused2:		offsetTableEntry.w PlrList_Mtz1			; 11
+PLCptr_Unused1:		offsetTableEntry.w PlrList_Std3			; 10
+PLCptr_Unused2:		offsetTableEntry.w PlrList_Std3			; 11
 PLCptr_Mtz1:		offsetTableEntry.w PlrList_Mtz1			; 12
 PLCptr_Mtz2:		offsetTableEntry.w PlrList_Mtz2			; 13
 			offsetTableEntry.w PlrList_Wfz1			; 14
@@ -85973,6 +86103,10 @@ PlrList_Std2: plrlistheader
 	plreq ArtTile_ArtNem_Shield, ArtNem_Shield
 	plreq ArtTile_ArtNem_Invincible_stars, ArtNem_Invincible_stars
 PlrList_Std2_End
+
+PlrList_Std3: plrlistheader
+	plreq ArtTile_ArtNem_Shield, ArtNem_Shield
+PlrList_Std3_End
 ;---------------------------------------------------------------------------------------
 ; PATTERN LOAD REQUEST LIST
 ; Aquatic level standard
@@ -86904,6 +87038,12 @@ ColP_EHZHTZ:	BINCLUDE	"collision/EHZ and HTZ primary 16x16 collision index.bin"
 ; EHZ and HTZ secondary 16x16 collision index (Kosinski compression)
 ColS_EHZHTZ:	BINCLUDE	"collision/EHZ and HTZ secondary 16x16 collision index.bin"
 	even
+ColP_EHZHTZ2:	BINCLUDE	"collision/EHZ and HTZ primary 16x16 collision index - kopie.bin"
+	even
+;---------------------------------------------------------------------------------------
+; EHZ and HTZ secondary 16x16 collision index (Kosinski compression)
+ColS_EHZHTZ2:	BINCLUDE	"collision/EHZ and HTZ secondary 16x16 collision index - kopie.bin"
+	even
 ;---------------------------------------------------------------------------------------
 ; MTZ primary 16x16 collision index (Kosinski compression)
 ColP_MTZ:	BINCLUDE	"collision/MTZ primary 16x16 collision index.bin"
@@ -86972,7 +87112,7 @@ Off_Level: zoneOrderedOffsetTable 2,2
 	zoneOffsetTableEntry.w Level_EHZ1
 	zoneOffsetTableEntry.w Level_EHZ2	; 1
 	zoneOffsetTableEntry.w Level_EHZ1	; 2
-	zoneOffsetTableEntry.w Level_EHZ1	; 3
+	zoneOffsetTableEntry.w Level_EHZ2	; 3
 	zoneOffsetTableEntry.w Level_EHZ1	; 4
 	zoneOffsetTableEntry.w Level_EHZ1	; 5
 	zoneOffsetTableEntry.w Level_EHZ1	; 6
@@ -86987,7 +87127,7 @@ Off_Level: zoneOrderedOffsetTable 2,2
 	zoneOffsetTableEntry.w Level_HTZ2	; 15
 	zoneOffsetTableEntry.w Level_HPZ1	; 16
 	zoneOffsetTableEntry.w Level_HPZ1	; 17
-	zoneOffsetTableEntry.w Level_EHZ1	; 18
+	zoneOffsetTableEntry.w Level_GCZ1	; 18
 	zoneOffsetTableEntry.w Level_EHZ1	; 19
 	zoneOffsetTableEntry.w Level_OOZ1	; 20
 	zoneOffsetTableEntry.w Level_OOZ2	; 21
@@ -87006,6 +87146,8 @@ Off_Level: zoneOrderedOffsetTable 2,2
     zoneTableEnd
 ;---------------------------------------------------------------------------------------
 ; EHZ act 1 level layout (Kosinski compression)
+Level_GCZ1:	BINCLUDE	"Star Light Zone Act 1/Layout.bin"
+	even
 Level_EHZ1:	BINCLUDE	"level/layout/EHZ_1.bin"
 	even
 ;---------------------------------------------------------------------------------------
@@ -88179,14 +88321,18 @@ ArtNem_EndingTitle:	BINCLUDE	"art/nemesis/Sonic the Hedgehog 2 image at end of c
 ; blocks or 64 cells.
 ; As noted earlier, each element of the table provides 'i' for blockMapTable[i][j].
 ; */
-
+BM128_GCZ:	BINCLUDE	"Star Light Zone Act 1/Chunks.bin"
+BM16_GCZ:	BINCLUDE	"Star Light Zone Act 1/Blocks.bin"
+ArtKos_GCZ:	BINCLUDE	"Star Light Zone Act 1/Tiles.bin"
 ;----------------------------------------------------------------------------------
 ; EHZ 16x16 block mappings (Kosinski compression) ; was: (Kozinski compression)
 BM16_EHZ:	BINCLUDE	"mappings/16x16/EHZ.bin"
+BM16_EHZ2:	BINCLUDE	"mappings/16x16/EHZ_NAKA.bin"
 ;-----------------------------------------------------------------------------------
 ; EHZ/HTZ main level patterns (Kosinski compression)
 ; ArtKoz_95C24:
 ArtKos_EHZ:	BINCLUDE	"art/kosinski/EHZ_HTZ.bin"
+ArtKos_EHZ2:	BINCLUDE	"art/kosinski/EHZ_HTZ_NAKA.bin"
 ;-----------------------------------------------------------------------------------
 ; HTZ 16x16 block mappings (Kosinski compression)
 BM16_HTZ:	BINCLUDE	"mappings/16x16/HTZ.bin"
@@ -88197,6 +88343,7 @@ ArtKos_HTZ:	BINCLUDE	"art/kosinski/HTZ_Supp.bin"
 ;-----------------------------------------------------------------------------------
 ; EHZ/HTZ 128x128 block mappings (Kosinski compression)
 BM128_EHZ:	BINCLUDE	"mappings/128x128/EHZ_HTZ.bin"
+BM128_EHZ2:	BINCLUDE	"mappings/128x128/EHZ_HTZ_NAKA.bin"
 ;-----------------------------------------------------------------------------------
 ; MTZ 16x16 block mappings (Kosinski compression)
 BM16_MTZ:	BINCLUDE	"mappings/16x16/MTZ.bin"
@@ -88605,8 +88752,8 @@ MiscKoz_SpecialObjectLocations:	BINCLUDE	"misc/Special stage object location lis
 Off_Rings: zoneOrderedOffsetTable 2,2
 	zoneOffsetTableEntry.w  Rings_EHZ_1	; 0  $00
 	zoneOffsetTableEntry.w  Rings_EHZ_2	; 1
-	zoneOffsetTableEntry.w  Rings_Lev1_1	; 2  $01
-	zoneOffsetTableEntry.w  Rings_Lev1_2	; 3
+	zoneOffsetTableEntry.w  Rings_EHZ_1	; 2  $01
+	zoneOffsetTableEntry.w  Rings_EHZ_2	; 3
 	zoneOffsetTableEntry.w  Rings_Lev2_1	; 4  $02
 	zoneOffsetTableEntry.w  Rings_Lev2_2	; 5
 	zoneOffsetTableEntry.w  Rings_Lev3_1	; 6  $03
@@ -88685,8 +88832,8 @@ Rings_SCZ_2:	BINCLUDE	"level/rings/SCZ_2.bin"
 Off_Objects: zoneOrderedOffsetTable 2,2
 	zoneOffsetTableEntry.w  Objects_EHZ_1	; 0  $00
 	zoneOffsetTableEntry.w  Objects_EHZ_2	; 1
-	zoneOffsetTableEntry.w  Objects_Null	; 2  $01
-	zoneOffsetTableEntry.w  Objects_Null	; 3
+	zoneOffsetTableEntry.w  Objects_EHZ_1	; 2  $01
+	zoneOffsetTableEntry.w  Objects_EHZ_2	; 3
 	zoneOffsetTableEntry.w  Objects_Null	; 4  $02
 	zoneOffsetTableEntry.w  Objects_Null	; 5
 	zoneOffsetTableEntry.w  Objects_Null	; 6  $03

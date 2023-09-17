@@ -1,10 +1,37 @@
 {
     "Flex": 2,
     "name": "Sonic 2",
-    "node": "6f91f0d4-fc0a-4492-9655-b9ebb70958c1",
+    "node": "9b5fd444-f54e-410f-a7fd-89e390e76219",
     "objects": [
         {
-            "uuid": "076eee63-2f67-4df7-9c35-512864c396c9",
+            "uuid": "90ed3300-8139-463e-8288-627d4dd53283",
+            "format": "Sonic 1.js",
+            "name": "object",
+            "palettes": [],
+            "art": {
+                "path": "",
+                "compression": "Uncompressed",
+                "offset": 0
+            },
+            "mappings": {
+                "path": "",
+                "label": ""
+            },
+            "dplcs": {
+                "enabled": false,
+                "path": "",
+                "label": ""
+            }
+        },
+        {
+            "name": "folder",
+            "children": [],
+            "isDirectory": true,
+            "expanded": true,
+            "uuid": "dab6489b-f1c8-4682-aa9a-cb7bc92eb47d"
+        },
+        {
+            "uuid": "9d392e8a-553c-4e92-afe0-00c491d494f8",
             "format": "Sonic 2.js",
             "name": "object",
             "palettes": [
@@ -24,6 +51,35 @@
             },
             "mappings": {
                 "path": "mappings\\sprite\\objC7.bin",
+                "label": ""
+            },
+            "dplcs": {
+                "enabled": false,
+                "path": "",
+                "label": ""
+            }
+        },
+        {
+            "uuid": "076eee63-2f67-4df7-9c35-512864c396c9",
+            "format": "Sonic 2.js",
+            "name": "object2",
+            "palettes": [
+                {
+                    "path": "art\\palettes\\SonicAndTails.bin",
+                    "length": 1
+                },
+                {
+                    "path": "art\\palettes\\DEZ.bin",
+                    "length": 3
+                }
+            ],
+            "art": {
+                "path": "art\\nemesis\\Silver Sonic.bin",
+                "compression": "Nemesis",
+                "offset": 0
+            },
+            "mappings": {
+                "path": "mappings\\sprite\\objAF_a.bin",
                 "label": ""
             },
             "dplcs": {
@@ -2078,7 +2134,7 @@
                 }
             ],
             "isDirectory": true,
-            "expanded": true,
+            "expanded": false,
             "uuid": "0f67fd89-e390-4762-9990-3de83e73254b"
         },
         {
@@ -2914,7 +2970,7 @@
                 }
             ],
             "isDirectory": true,
-            "expanded": true,
+            "expanded": false,
             "uuid": "7bb9408e-1ee0-4b7f-a620-5b0b697e22b0"
         },
         {
