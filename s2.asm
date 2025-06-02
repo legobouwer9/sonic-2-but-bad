@@ -60786,7 +60786,7 @@ Obj56_Init:
 	move.b	#$14,y_radius(a0)
 	move.b	#4,priority(a0)
 	move.b	#$F,collision_flags(a0)
-	move.b	#16,collision_property(a0)	; hitcount
+	move.b	#8,collision_property(a0)	; hitcount
 	addq.b	#2,routine(a0)
 	move.w	x_pos(a0),objoff_30(a0)
 	move.w	y_pos(a0),objoff_38(a0)
