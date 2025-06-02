@@ -65371,7 +65371,7 @@ Obj53_Burst:
 	jsrto	(PlaySound).l, JmpTo10_PlaySound
 	movea.l	objoff_34(a0),a1 ; a1=object
 	subi_.b	#1,objoff_2C(a1)
-	jmp	loc_38A44
+	;jmp	loc_38A44
     if removeJmpTos
 JmpTo61_DeleteObject ; JmpTo
     endif
